@@ -1,0 +1,5 @@
+.env
+weatherflow_env/
+config/config.yaml
+*.pyc
+__pycache__

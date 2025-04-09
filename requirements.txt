@@ -1,0 +1,5 @@
+requests
+pyspark
+psycopg2
+python-dotenv
+sqlalchemy

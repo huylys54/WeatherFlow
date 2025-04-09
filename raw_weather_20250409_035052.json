@@ -1,0 +1,38 @@
+[
+  {
+    "city": "London",
+    "temperature_k": 277.11,
+    "humidity": 86,
+    "weather_desc": "clear sky",
+    "timestamp": 1744170159,
+    "pressure": 1027,
+    "wind_speed": 1.54
+  },
+  {
+    "city": "New York",
+    "temperature_k": 275.83,
+    "humidity": 38,
+    "weather_desc": "clear sky",
+    "timestamp": 1744170234,
+    "pressure": 1019,
+    "wind_speed": 10.29
+  },
+  {
+    "city": "Tokyo",
+    "temperature_k": 294.15,
+    "humidity": 29,
+    "weather_desc": "few clouds",
+    "timestamp": 1744170132,
+    "pressure": 1010,
+    "wind_speed": 4.63
+  },
+  {
+    "city": "Hanoi",
+    "temperature_k": 299.15,
+    "humidity": 71,
+    "weather_desc": "overcast clouds",
+    "timestamp": 1744170432,
+    "pressure": 1012,
+    "wind_speed": 5.13
+  }
+]
