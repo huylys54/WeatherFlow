@@ -1,5 +1,8 @@
 requests
 pyspark
-psycopg2
+psycopg2-binary
 python-dotenv
 sqlalchemy
+pandas
+numpy
+dotenv

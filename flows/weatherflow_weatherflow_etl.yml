@@ -1,0 +1,49 @@
+id: weatherflow_etl
+namespace: weatherflow
+
+tasks:
+  - id: weather_etl_flow
+    type: io.kestra.plugin.core.flow.WorkingDirectory
+    inputFiles:
+      extract_weather.py: "{{ read('scripts/extract_weather.py') }}"
+      transform_weather.py: "{{ read('scripts/transform_weather.py') }}"
+      load_weather.py: "{{ read('scripts/load_weather.py') }}"
+      .env: "{{ read('.env') }}"
+    tasks:
+    - id: extract
+      type: io.kestra.plugin.scripts.python.Commands
+      taskRunner:
+        type: io.kestra.plugin.scripts.runner.docker.Docker
+        pullPolicy: NEVER
+      containerImage: weather-deps:v2
+      commands:
+        - python ./extract_weather.py --cities "London" "New York" "Hanoi" "Paris" "Tokyo"
+      outputFiles:
+        - "*.json"
+
+    - id: transform
+      type: io.kestra.plugin.scripts.python.Commands
+      containerImage: weather-deps:v2
+      taskRunner:
+        type: io.kestra.plugin.scripts.runner.docker.Docker
+        pullPolicy: NEVER
+      inputFiles:
+        "{{ outputs.extract.outputFiles }}"
+      commands:
+        - ls {{workingDir}}
+        - python transform_weather.py --input-file *.json
+      outputFiles:
+        - "**/*.csv"
+
+    - id: load
+      type: io.kestra.plugin.scripts.python.Commands
+      containerImage: weather-deps:v2
+      taskRunner:
+        type: io.kestra.plugin.scripts.runner.docker.Docker
+        networkMode: postgres_default
+        pullPolicy: NEVER
+      inputFiles:
+        "{{ outputs.transform.outputFiles }}"
+      commands:
+        - python load_weather.py --input-path *.csv --table-name weather_data
+      

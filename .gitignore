@@ -1,5 +1,7 @@
 .env
+test.py
 weatherflow_env/
 config/config.yaml
 *.pyc
+data/*
 __pycache__

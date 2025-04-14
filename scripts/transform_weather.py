@@ -2,11 +2,14 @@ from pyspark.sql import SparkSession
 import pyspark.sql.functions as F
 from pyspark.sql.types import *
 import json
+import argparse
+
 def load_data(file_path):
     try:
         with open(file_path, 'r') as file:
             data = json.load(file)
-        return data
+        filename = file_path.split('/')[-1]
+        return data, filename
     except FileNotFoundError:
         print(f"File {file_path} not found.")
         return None
@@ -14,7 +17,7 @@ def load_data(file_path):
         print(f"Error decoding JSON from file {file_path}.")
         return None
 
-def transform_weather(data):
+def transform_weather(data, filename):
     spark = SparkSession.builder.appName("WeatherFlow").getOrCreate()
     
     # Define expected schema
@@ -51,15 +54,31 @@ def transform_weather(data):
                        .when(F.col("wind_speed") <= 28.4, "Storm")
                        .when(F.col("wind_speed") <= 32.6, "Violent Storm")
                        .otherwise("Hurricane"))
-    return df, spark
+    
+    
+    timestamp = filename.split('_')[-2:]
+    timestamp = "".join(timestamp).replace('.json', '')
+    transformed_output = f"transformed_weather_{timestamp}.csv"
+    df.write.mode("overwrite").csv(transformed_output)
+    
+    print(f"Transformed data saved to {transformed_output}")
+    spark.stop()
+    return transformed_output
+
+def main(params):
+    data, filename = load_data(params.input_file)
+    if data:
+        transformed_path = transform_weather(data, filename)
+        return transformed_path
+    else:
+        print("Skipping transformation due to missing/empty input file.")
+
 
 if __name__ == "__main__":
-    # Sample raw data for testing
-    json_file = "raw_weather_20250409_035052.json"
-    data = load_data(json_file)
+    parser = argparse.ArgumentParser(description='Transform raw weather.')
+    parser.add_argument('--input-file', required=True,
+                       help='Path to raw JSON file (e.g., /app/data/raw_weather_*.json)')
+
+    args = parser.parse_args()
     
-    transformed_df, spark = transform_weather(data)
-    
-    transformed_df.show(truncate=False)
-    
-    spark.stop()
+    main(args)

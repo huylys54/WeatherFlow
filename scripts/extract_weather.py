@@ -3,6 +3,9 @@ from dotenv import load_dotenv
 import os
 import json
 import datetime
+import time
+import argparse
+
 
 load_dotenv()
 
@@ -28,18 +31,29 @@ def extract_weather(cities):
             })
         except requests.exceptions.RequestException as e:
             print(f"Error fetching data for {city}: {e}")
+        time.sleep(1)
     return weather_data
 
 def save_to_json(data, file_name):
     with open(file_name, 'w') as f:
         json.dump(data, f, indent=2)
-    
-if __name__ == "__main__":
-    cities = ["London", "New York", "Tokyo", "Hanoi"]
-    weather_data = extract_weather(cities)
+
+
+def main(params):
+    weather_data = extract_weather(params.cities)
     if weather_data:
         filename = f"raw_weather_{datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d_%H%M%S')}.json"
         save_to_json(weather_data, filename)
         print(f"Weather data saved to {filename}")
     else:
         print("No data extracted.")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Extract weather data from OpenWeatherMap API.')
+    parser.add_argument('--cities', nargs='+', default=["London", "New York", "Tokyo", "Hanoi"],
+                       help='List of cities to fetch weather data')
+
+    args = parser.parse_args()
+    
+    main(args)
